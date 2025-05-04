@@ -131,7 +131,8 @@
             document.getElementById('card-container').style.display = 'none';
 
             try {
-                const response = await fetch('https://db.ygoprodeck.com/api/v7/randomcard.php');
+                // 修改后的fetch请求
+                const response = await fetch(`https://corsproxy.io/?${encodeURIComponent('https://db.ygoprodeck.com/api/v7/randomcard.php')}`);
                 if (!response.ok) throw new Error('网络响应异常');
                 
                 const data = await response.json();
