@@ -131,8 +131,10 @@
             document.getElementById('card-container').style.display = 'none';
 
             try {
-                // 修改后的fetch请求
-                const response = await fetch(`https://corsproxy.io/?${encodeURIComponent('https://db.ygoprodeck.com/api/v7/randomcard.php')}`);
+                // 使用代理服务
+                const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                const targetUrl = 'https://db.ygoprodeck.com/api/v7/randomcard.php';
+                const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
                 if (!response.ok) throw new Error('网络响应异常');
                 
                 const data = await response.json();
@@ -140,7 +142,8 @@
                 
                 // 更新卡片信息
                 document.getElementById('card-name').textContent = card.name;
-                document.getElementById('card-image').src = card.card_images[0].image_url;
+                // document.getElementById('card-image').src = card.card_images[0].image_url;
+                document.getElementById('card-image').src = card.card_images[0].image_url_cropped;
                 document.getElementById('card-desc').textContent = card.desc;
                 document.getElementById('card-type').innerHTML = 
                     `类型: <span class="badge">${card.type}</span>`;
