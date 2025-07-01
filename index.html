@@ -142,7 +142,7 @@
                 const cn_targetUrl = 'https://ygocdb.com/api/v0/?search=' + card.id;
                 const cn_response = await fetch(proxyUrl + encodeURIComponent(cn_targetUrl));
                 if (!response.ok) throw new Error('网络响应异常');
-                const cn_data = await response.json();
+                const cn_data = await cn_response.json();
                 const cn_card = cn_data.result[0];
                 
                 // 更新卡片信息
