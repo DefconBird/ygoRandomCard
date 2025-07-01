@@ -136,15 +136,20 @@
                 const targetUrl = 'https://db.ygoprodeck.com/api/v7/randomcard.php?' + new Date().getTime();
                 const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
                 if (!response.ok) throw new Error('网络响应异常');
-                
                 const data = await response.json();
                 const card = data.data[0];
+
+                const cn_targetUrl = 'https://ygocdb.com/api/v0/?search=' + card.id;
+                const cn_response = await fetch(proxyUrl + encodeURIComponent(cn_targetUrl));
+                if (!response.ok) throw new Error('网络响应异常');
+                const cn_data = await response.json();
+                const cn_card = cn_data.result[0];
                 
                 // 更新卡片信息
-                document.getElementById('card-name').textContent = card.name;
+                document.getElementById('card-name').textContent = cn_card.cn_name;
                 // 添加时间戳避免图片缓存
                 document.getElementById('card-image').src = card.card_images[0].image_url_cropped + '?t=' + new Date().getTime();
-                document.getElementById('card-desc').textContent = card.desc;
+                document.getElementById('card-desc').textContent = cn_card.text.desc;
                 document.getElementById('card-type').innerHTML = 
                     `类型: <span class="badge">${card.type}</span>`;
         
