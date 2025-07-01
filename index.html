@@ -114,6 +114,7 @@
             <img class="card-image" id="card-image" src="" alt="卡片图片">
             <div class="card-info">
                 <h2 id="card-name"></h2>
+                <h2 id="card-cnname"></h2>
                 <p id="card-type"></p>
                 <p id="card-desc"></p>
                 <div id="card-stats"></div>
@@ -146,7 +147,8 @@
                 const cn_card = cn_data.result[0];
                 
                 // 更新卡片信息
-                document.getElementById('card-name').textContent = cn_card.cn_name;
+                document.getElementById('card-name').textContent = card.name;
+                document.getElementById('card-cnname').textContent = cn_card.cn_name;
                 // 添加时间戳避免图片缓存
                 document.getElementById('card-image').src = card.card_images[0].image_url_cropped + '?t=' + new Date().getTime();
                 document.getElementById('card-desc').textContent = cn_card.text.desc;
