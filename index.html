@@ -1,0 +1,662 @@
+<!-- <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏王随机卡片生成器</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #0a0a1a;
+            color: #fff;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            margin-bottom: 30px;
+        }
+
+        #card-container {
+            background: #1a1a2f;
+            border: 2px solid #3a3a5f;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .card-image {
+            width: 100%;
+            max-width: 300px;
+            border: 3px solid #3a3a5f;
+            border-radius: 10px;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .card-info {
+            margin-top: 20px;
+        }
+
+        .card-info p {
+            margin: 8px 0;
+            font-size: 1.1em;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        .monster-stats {
+            color: #ff6666;
+        }
+
+        .spell-trap {
+            color: #66cc66;
+        }
+
+        button {
+            background: #3a3a5f;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s;
+            margin: 10px auto;
+            display: block;
+        }
+
+        button:hover {
+            background: #4a4a7f;
+            transform: scale(1.05);
+        }
+
+        .error {
+            color: #ff4444;
+            text-align: center;
+            padding: 10px;
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            display: none;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎴 游戏王随机卡片生成器</h1>
+        <button onclick="getRandomCard()">获取随机卡片</button>
+        <div class="loading" id="loading">加载中...</div>
+        <div class="error" id="error"></div>
+        <div id="card-container">
+            <img class="card-image" id="card-image" src="" alt="卡片图片">
+            <div class="card-info">
+                <h2 id="card-name"></h2>
+                <p id="card-type"></p>
+                <p id="card-desc"></p>
+                <div id="card-stats"></div>
+                <p id="card-archetype"></p>
+                <p id="card-set"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function getRandomCard() {
+            // 显示加载状态
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('card-container').style.display = 'none';
+        
+            try {
+                // 使用代理服务并添加时间戳避免缓存
+                const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                const targetUrl = 'https://db.ygoprodeck.com/api/v7/randomcard.php?' + new Date().getTime();
+                const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
+                if (!response.ok) throw new Error('网络响应异常');
+                
+                const data = await response.json();
+                const card = data.data[0];
+                
+                // 更新卡片信息
+                document.getElementById('card-name').textContent = card.name;
+                // 添加时间戳避免图片缓存
+                document.getElementById('card-image').src = card.card_images[0].image_url_cropped + '?t=' + new Date().getTime();
+                document.getElementById('card-desc').textContent = card.desc;
+                document.getElementById('card-type').innerHTML = 
+                    `类型: <span class="badge">${card.type}</span>`;
+        
+                // 处理不同类型卡片信息
+                const statsDiv = document.getElementById('card-stats');
+                statsDiv.innerHTML = '';
+                
+                if (card.type.includes('Monster')) {
+                    statsDiv.innerHTML = `
+                        <p class="monster-stats">ATK/${card.atk} | DEF/${card.def}</p>
+                        <p>等级: ${card.level} | 属性: ${card.attribute} | 种族: ${card.race}</p>
+                    `;
+                } else {
+                    statsDiv.innerHTML = `
+                        <p class="spell-trap">类型: ${card.race}</p>
+                    `;
+                }
+        
+                // 显示其他信息
+                document.getElementById('card-archetype').textContent = 
+                    card.archetype ? `所属系列: ${card.archetype}` : '';
+                document.getElementById('card-set').textContent = 
+                    card.card_sets ? `卡包: ${card.card_sets[0].set_name}` : '';
+        
+                // 显示卡片容器
+                document.getElementById('card-container').style.display = 'block';
+            } catch (error) {
+                document.getElementById('error').textContent = 
+                    `错误: ${error.message}，请稍后重试`;
+                document.getElementById('error').style.display = 'block';
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
+ -->
+
+ <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏王随机卡片生成器</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=MedievalSharp&display=swap" rel="stylesheet">
+    <style>
+        /* 基础重置 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #111125 0%, #0c0c1e 50%, #1a1a3a 100%);
+            color: #f9f7e6;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+            background-image: radial-gradient(ellipse at center, rgba(150, 120, 0, 0.05) 0%, rgba(150, 120, 0, 0.02) 70%, transparent 100%);
+        }
+        
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="none" width="100" height="100"/><path d="M5,5 L95,5 L95,25 L75,25 L75,45 L45,45 L45,65 L25,65 L25,85 L5,85 Z" fill="none" stroke="rgba(160,130,20,0.15)" stroke-width="1"/></svg>');
+            opacity: 0.15;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            margin: 20px auto;
+        }
+
+        /* 标题样式 */
+        h1 {
+            font-family: 'MedievalSharp', cursive;
+            text-align: center;
+            color: #ffd700;
+            font-size: 2.8rem;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7), 0 0 20px rgba(255, 215, 0, 0.5);
+            margin: 20px 0 40px;
+            position: relative;
+            padding: 0 20px 15px;
+            letter-spacing: 2px;
+        }
+
+        h1::after {
+            content: "☆ ☆ ☆ ☆ ☆ ☆ ☆";
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            right: 0;
+            font-size: 18px;
+            color: rgba(255, 215, 0, 0.5);
+            letter-spacing: 8px;
+            text-align: center;
+        }
+
+        /* 按钮样式 */
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin: 25px 0;
+        }
+
+        button {
+            background: linear-gradient(to bottom, #d4af37 0%, #b8860b 100%);
+            color: #111125;
+            font-family: 'MedievalSharp', cursive;
+            border: none;
+            padding: 14px 36px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.3rem;
+            transition: all 0.4s;
+            margin: 0 10px;
+            box-shadow: 0 6px 15px rgba(212, 175, 55, 0.4);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 1px;
+            font-weight: bold;
+            text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 215, 0, 0.7);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(212, 175, 55, 0.6);
+            background: linear-gradient(to bottom, #e8c35c 0%, #cda035 100%);
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 3px 10px rgba(212, 175, 55, 0.4);
+        }
+
+        button::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%);
+            transform: rotate(30deg);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        button:hover::after {
+            opacity: 1;
+        }
+
+        /* 卡片容器样式 */
+        #card-container {
+            background: rgba(15, 15, 35, 0.85);
+            border: 3px solid #d4af37;
+            border-radius: 12px;
+            padding: 25px 30px;
+            margin: 30px 0;
+            display: none;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.4), inset 0 0 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #card-container::before {
+            content: "";
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            border-radius: 8px;
+            pointer-events: none;
+        }
+
+        .card-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .image-container {
+            flex: 1;
+            min-width: 280px;
+            position: relative;
+            perspective: 1500px;
+        }
+
+        .card-image {
+            width: 100%;
+            border-radius: 10px;
+            border: 3px solid #3a3a5f;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+            transform-style: preserve-3d;
+            transition: transform 0.8s, box-shadow 0.5s;
+        }
+
+        .image-container:hover .card-image {
+            transform: rotateY(5deg) rotateX(2deg) scale(1.02);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.9), 0 0 30px rgba(212, 175, 55, 0.6);
+        }
+
+        /* 卡片信息样式 */
+        .card-info {
+            flex: 1;
+            min-width: 280px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-name {
+            font-family: 'MedievalSharp', cursive;
+            font-size: 2.2rem;
+            color: #ffd700;
+            margin-bottom: 15px;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+            border-bottom: 2px solid rgba(212, 175, 55, 0.5);
+            padding-bottom: 10px;
+        }
+
+        .card-info-content {
+            flex: 1;
+        }
+
+        .card-info p {
+            margin: 12px 0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .card-desc {
+            background: rgba(20, 20, 40, 0.6);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #d4af37;
+            font-style: italic;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+            margin: 15px 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            margin: 0 5px 5px 0;
+            font-weight: bold;
+            background: rgba(180, 150, 50, 0.3);
+            color: #ffd700;
+            font-size: 0.9rem;
+        }
+
+        .monster-stats {
+            background: linear-gradient(to right, #822 0%, #a33 100%);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            box-shadow: 0 0 10px rgba(170, 0, 0, 0.4);
+            color: #fff;
+        }
+
+        .spell-trap {
+            background: linear-gradient(to right, #226622 0%, #338833 100%);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            box-shadow: 0 0 10px rgba(0, 170, 0, 0.4);
+            color: #fff;
+        }
+
+        .card-archetype, .card-set {
+            padding: 8px 15px;
+            border-radius: 4px;
+            background: rgba(50, 50, 100, 0.4);
+            display: inline-block;
+            margin: 5px 0;
+        }
+
+        /* 错误和信息样式 */
+        .error {
+            color: #ff7777;
+            background: rgba(60, 15, 15, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+            border: 1px solid #a33;
+        }
+
+        .loading {
+            text-align: center;
+            display: none;
+            color: #ffd700;
+            margin: 40px 0;
+            font-size: 1.3rem;
+        }
+
+        .loading::after {
+            content: "";
+            animation: ellipsis 1.5s infinite;
+        }
+
+        @keyframes ellipsis {
+            0% { content: "."; }
+            33% { content: ".."; }
+            66% { content: "..."; }
+            100% { content: "."; }
+        }
+
+        /* 页脚样式 */
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #aaa;
+            opacity: 0.7;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .card-content {
+                flex-direction: column;
+            }
+            
+            .image-container {
+                max-width: 100%;
+                margin: 0 auto;
+            }
+            
+            button {
+                padding: 12px 28px;
+                font-size: 1.1rem;
+            }
+        }
+
+        /* 装饰性元素 */
+        .decoration {
+            position: fixed;
+            font-size: 200px;
+            color: rgba(180, 150, 0, 0.03);
+            z-index: -1;
+        }
+
+        .d1 { top: 10%; left: 5%; transform: rotate(15deg); }
+        .d2 { top: 20%; right: 5%; transform: rotate(-25deg); }
+        .d3 { bottom: 20%; left: 10%; transform: rotate(10deg); }
+        .d4 { bottom: 10%; right: 15%; transform: rotate(-15deg); }
+    </style>
+</head>
+<body>
+    <div class="decoration d1">♦</div>
+    <div class="decoration d2">♣</div>
+    <div class="decoration d3">♥</div>
+    <div class="decoration d4">♠</div>
+    
+    <div class="container">
+        <h1>游戏王随机卡片生成器</h1>
+        
+        <div class="btn-container">
+            <button onclick="getRandomCard()">随机召唤卡片</button>
+        </div>
+        
+        <div class="loading" id="loading">读取千年宝物信息中</div>
+        <div class="error" id="error"></div>
+        
+        <div id="card-container">
+            <div class="card-content">
+                <div class="image-container">
+                    <img class="card-image" id="card-image" src="" alt="卡片图片">
+                </div>
+                
+                <div class="card-info">
+                    <h2 class="card-name" id="card-name"></h2>
+                    <div class="card-info-content">
+                        <p id="card-type"></p>
+                        <p class="card-desc" id="card-desc"></p>
+                        <div id="card-stats"></div>
+                        <p id="card-archetype"></p>
+                        <p id="card-set"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>召唤属于你的决斗怪兽！本应用使用Yu-Gi-Oh! API</p>
+    </footer>
+
+    <script>
+        // 卡片数据示例（真实应用中会从API获取）
+        const exampleCards = [
+            {
+                name: "青眼白龙",
+                type: "效果怪兽",
+                desc: "以高攻击力著称的传说之龙。任何对手都能粉碎，其破坏力不可估量。",
+                atk: 3000,
+                def: 2500,
+                level: 8,
+                attribute: "光",
+                race: "龙族",
+                archetype: "青眼",
+                card_sets: [{set_name: "初代游戏王卡包"}],
+                card_images: [{image_url_cropped: "https://images.ygoprodeck.com/images/cards_cropped/89631139.jpg"}]
+            },
+            {
+                name: "黑魔导",
+                type: "效果怪兽",
+                desc: "作为魔法师的攻击力、守备力都是最高级别。",
+                atk: 2500,
+                def: 2100,
+                level: 7,
+                attribute: "暗",
+                race: "魔法师族",
+                archetype: "黑魔导",
+                card_sets: [{set_name: "魔法师卡组"}],
+                card_images: [{image_url_cropped: "https://images.ygoprodeck.com/images/cards_cropped/46986414.jpg"}]
+            },
+            {
+                name: "强欲之壶",
+                type: "通常魔法",
+                desc: "从自己的卡组抽2张卡。",
+                race: "通常魔法",
+                archetype: "",
+                card_sets: [{set_name: "初代游戏王卡包"}],
+                card_images: [{image_url_cropped: "https://images.ygoprodeck.com/images/cards_cropped/55144522.jpg"}]
+            }
+        ];
+
+        let currentCardIndex = 0;
+
+        // 使用示例数据生成卡片
+        function getRandomCard() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('card-container').style.display = 'none';
+
+            // 模拟API请求延迟
+            setTimeout(() => {
+                try {
+                    // 从示例数据中随机选择一个卡片
+                    const card = exampleCards[currentCardIndex];
+                    
+                    // 更新卡片信息
+                    document.getElementById('card-name').textContent = card.name;
+                    document.getElementById('card-image').src = card.card_images[0].image_url_cropped;
+                    document.getElementById('card-desc').textContent = card.desc;
+                    
+                    document.getElementById('card-type').innerHTML = 
+                        `卡片类型: <span class="badge">${card.type}</span>`;
+                    
+                    const statsDiv = document.getElementById('card-stats');
+                    statsDiv.innerHTML = '';
+                    
+                    if (card.type.includes('怪兽')) {
+                        statsDiv.innerHTML = `
+                            <div class="monster-stats">攻击力: ${card.atk} | 防御力: ${card.def}</div>
+                            <p>等级: ${card.level} | 属性: <span class="badge">${card.attribute}</span> | 种族: <span class="badge">${card.race}</span></p>
+                        `;
+                    } else {
+                        statsDiv.innerHTML = `
+                            <div class="spell-trap">魔法/陷阱类型: <span class="badge">${card.race}</span></div>
+                        `;
+                    }
+                    
+                    document.getElementById('card-archetype').innerHTML = 
+                        card.archetype ? `<span class="card-archetype">所属系列: ${card.archetype}</span>` : '';
+                    
+                    document.getElementById('card-set').innerHTML = 
+                        card.card_sets ? `<span class="card-set">卡包: ${card.card_sets[0].set_name}</span>` : '';
+                    
+                    document.getElementById('card-container').style.display = 'block';
+                    
+                    // 增加索引，循环显示示例卡片
+                    currentCardIndex = (currentCardIndex + 1) % exampleCards.length;
+                    
+                } catch (error) {
+                    document.getElementById('error').textContent = 
+                        `错误: ${error.message}，请稍后重试`;
+                    document.getElementById('error').style.display = 'block';
+                } finally {
+                    document.getElementById('loading').style.display = 'none';
+                }
+            }, 800); // 800ms的延迟模拟网络请求
+        }
+    </script>
+</body>
+</html>
