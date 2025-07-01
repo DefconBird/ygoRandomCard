@@ -124,16 +124,71 @@
     </div>
 
     <script>
+        // async function getRandomCard() {
+        //     // 显示加载状态
+        //     document.getElementById('loading').style.display = 'block';
+        //     document.getElementById('error').style.display = 'none';
+        //     document.getElementById('card-container').style.display = 'none';
+
+        //     try {
+        //         // 使用代理服务
+        //         const proxyUrl = 'https://api.allorigins.win/raw?url=';
+        //         const targetUrl = 'https://db.ygoprodeck.com/api/v7/randomcard.php';
+        //         const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
+        //         if (!response.ok) throw new Error('网络响应异常');
+                
+        //         const data = await response.json();
+        //         const card = data.data[0];
+                
+        //         // 更新卡片信息
+        //         document.getElementById('card-name').textContent = card.name;
+        //         // document.getElementById('card-image').src = card.card_images[0].image_url;
+        //         document.getElementById('card-image').src = card.card_images[0].image_url_cropped;
+        //         document.getElementById('card-desc').textContent = card.desc;
+        //         document.getElementById('card-type').innerHTML = 
+        //             `类型: <span class="badge">${card.type}</span>`;
+
+        //         // 处理不同类型卡片信息
+        //         const statsDiv = document.getElementById('card-stats');
+        //         statsDiv.innerHTML = '';
+                
+        //         if (card.type.includes('Monster')) {
+        //             statsDiv.innerHTML = `
+        //                 <p class="monster-stats">ATK/${card.atk} | DEF/${card.def}</p>
+        //                 <p>等级: ${card.level} | 属性: ${card.attribute} | 种族: ${card.race}</p>
+        //             `;
+        //         } else {
+        //             statsDiv.innerHTML = `
+        //                 <p class="spell-trap">类型: ${card.race}</p>
+        //             `;
+        //         }
+
+        //         // 显示其他信息
+        //         document.getElementById('card-archetype').textContent = 
+        //             card.archetype ? `所属系列: ${card.archetype}` : '';
+        //         document.getElementById('card-set').textContent = 
+        //             card.card_sets ? `卡包: ${card.card_sets[0].set_name}` : '';
+
+        //         // 显示卡片容器
+        //         document.getElementById('card-container').style.display = 'block';
+        //     } catch (error) {
+        //         document.getElementById('error').textContent = 
+        //             `错误: ${error.message}，请稍后重试`;
+        //         document.getElementById('error').style.display = 'block';
+        //     } finally {
+        //         document.getElementById('loading').style.display = 'none';
+        //     }
+        // }
         async function getRandomCard() {
             // 显示加载状态
             document.getElementById('loading').style.display = 'block';
             document.getElementById('error').style.display = 'none';
             document.getElementById('card-container').style.display = 'none';
-
+        
             try {
-                // 使用代理服务
+                // 使用代理服务并添加时间戳避免缓存
                 const proxyUrl = 'https://api.allorigins.win/raw?url=';
-                const targetUrl = 'https://db.ygoprodeck.com/api/v7/randomcard.php';
+                const targetUrl = 'https://db.ygoprodeck.com/api/v7/randomcard.php?' + new Date().getTime();
                 const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
                 if (!response.ok) throw new Error('网络响应异常');
                 
@@ -142,12 +197,12 @@
                 
                 // 更新卡片信息
                 document.getElementById('card-name').textContent = card.name;
-                // document.getElementById('card-image').src = card.card_images[0].image_url;
-                document.getElementById('card-image').src = card.card_images[0].image_url_cropped;
+                // 添加时间戳避免图片缓存
+                document.getElementById('card-image').src = card.card_images[0].image_url_cropped + '?t=' + new Date().getTime();
                 document.getElementById('card-desc').textContent = card.desc;
                 document.getElementById('card-type').innerHTML = 
                     `类型: <span class="badge">${card.type}</span>`;
-
+        
                 // 处理不同类型卡片信息
                 const statsDiv = document.getElementById('card-stats');
                 statsDiv.innerHTML = '';
@@ -162,13 +217,13 @@
                         <p class="spell-trap">类型: ${card.race}</p>
                     `;
                 }
-
+        
                 // 显示其他信息
                 document.getElementById('card-archetype').textContent = 
                     card.archetype ? `所属系列: ${card.archetype}` : '';
                 document.getElementById('card-set').textContent = 
                     card.card_sets ? `卡包: ${card.card_sets[0].set_name}` : '';
-
+        
                 // 显示卡片容器
                 document.getElementById('card-container').style.display = 'block';
             } catch (error) {
