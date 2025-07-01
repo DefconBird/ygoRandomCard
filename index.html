@@ -565,8 +565,8 @@
             
             try {
                 // 使用代理服务
-                const proxyUrl = 'https://corsproxy.io/?';
-                const targetUrl = 'https://db.ygoprodeck.com/api/v7/randomcard.php';
+                const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                const targetUrl = 'https://db.ygoprodeck.com/api/v7/randomcard.php?' + new Date().getTime();
                 const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
                 
                 if (!response.ok) throw new Error('网络响应异常');
