@@ -24,9 +24,9 @@
             min-height: 100vh;
         }
         
-        /* 左侧区域（卡图展示）- 宽度增加 */
+        /* 左侧区域（卡图展示） */
         .left-section {
-            flex: 1.2; /* 增加宽度比例 */
+            flex: 1.2;
             display: flex;
             flex-direction: column;
             position: relative;
@@ -39,7 +39,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 50px; /* 增加间距 */
+            margin-bottom: 50px;
             z-index: 2;
         }
         
@@ -76,19 +76,28 @@
             align-items: center;
             flex-grow: 1;
             position: relative;
-            height: calc(100vh - 150px); /* 充分利用空间 */
+            height: calc(100vh - 150px);
         }
         
-        .card-display {
+        .state-container {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 90%; /* 增大容器宽度 */
-            height: 80%; /* 增大容器高度 */
+            transition: all 0.3s ease;
+        }
+        
+        .card-display {
+            width: 90%;
+            height: 90%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         
         #card-image {
@@ -99,6 +108,7 @@
             box-shadow: 0 0 30px rgba(255, 107, 0, 0.4);
             transition: all 0.3s ease;
             object-fit: contain;
+            display: block;
         }
         
         .placeholder-graphic {
@@ -141,7 +151,7 @@
         
         /* 右侧区域（卡片信息） */
         .right-section {
-            flex: 0.8; /* 缩小宽度 */
+            flex: 0.8;
             background-color: #222222;
             padding: 40px 30px;
             overflow-y: auto;
@@ -255,19 +265,55 @@
         }
         
         .loading {
-            text-align: center;
-            display: none;
-            color: #888;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ff6b00;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
             font-size: 24px;
-            margin: auto;
+            color: #aaa;
+            text-align: center;
         }
         
         .error {
-            color: #ff4444;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            padding: 10px;
-            display: none;
-            font-size: 18px;
+            padding: 20px;
+            border-radius: 8px;
+            background: rgba(255, 68, 68, 0.1);
+            border: 1px solid rgba(255, 68, 68, 0.3);
+            max-width: 90%;
+        }
+        
+        .error-icon {
+            font-size: 50px;
+            color: #ff4444;
+            margin-bottom: 15px;
+        }
+        
+        .error-text {
+            font-size: 22px;
+            color: #ff4444;
+            line-height: 1.5;
         }
         
         #card-desc {
@@ -312,6 +358,10 @@
             .value, .badge, #card-desc {
                 font-size: 16px;
             }
+            
+            .loading-text, .error-text {
+                font-size: 18px;
+            }
         }
     </style>
 </head>
@@ -325,10 +375,10 @@
             </div>
             
             <div class="card-area">
-                <div class="card-display">
-                    <img id="card-image" src="" alt="随机游戏王卡片" style="display: none;">
-                    <div class="loading" id="loading">加载卡片中...</div>
-                    <div class="error" id="error"></div>
+                <div class="state-container" id="state-container">
+                    <div class="card-display">
+                        <img id="card-image" src="" alt="随机游戏王卡片">
+                    </div>
                     <div class="placeholder-graphic"></div>
                 </div>
             </div>
@@ -349,7 +399,7 @@
             
             <div class="info-container">
                 <h3 class="section-title">卡片信息</h3>
-                <div id="card-container" style="display: none;">
+                <div id="card-container">
                     <div class="detail-container">
                         <div class="info-row">
                             <div class="label">卡片名称</div>
@@ -410,13 +460,22 @@
 
     <script>
         async function getRandomCard() {
-            // 显示加载状态
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('error').style.display = 'none';
-            document.getElementById('card-image').style.display = 'none';
-            document.getElementById('card-container').style.display = 'none';
+            const stateContainer = document.getElementById('state-container');
+            const cardDisplay = document.querySelector('.card-display');
             
-            // 重置特定信息
+            // 创建加载中状态
+            stateContainer.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div class="loading-text">加载卡片中...</div>
+                </div>
+            `;
+            
+            // 重置卡片信息
+            document.getElementById('card-name').textContent = '';
+            document.getElementById('card-cnname').textContent = '';
+            document.getElementById('card-desc').textContent = '';
+            document.getElementById('card-type').textContent = '';
             document.getElementById('card-stats-row').style.display = 'none';
             document.getElementById('spell-trap-row').style.display = 'none';
             document.getElementById('archetype-row').style.display = 'none';
@@ -427,18 +486,56 @@
                 const proxyUrl = 'https://api.allorigins.win/raw?url=';
                 const targetUrl = 'https://db.ygoprodeck.com/api/v7/randomcard.php?' + new Date().getTime();
                 const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
+                
                 if (!response.ok) throw new Error('网络响应异常');
+                
                 const data = await response.json();
                 const card = data.data[0];
                 
-                // 更新卡片图像
-                document.getElementById('card-image').src = card.card_images[0].image_url_cropped + '?t=' + new Date().getTime();
-                document.getElementById('card-image').onload = function() {
-                    document.getElementById('card-image').style.display = 'block';
-                    document.getElementById('card-container').style.display = 'block';
+                // 创建图片元素
+                const img = new Image();
+                img.src = card.card_images[0].image_url_cropped + '?t=' + new Date().getTime();
+                img.alt = "随机游戏王卡片";
+                img.id = "card-image";
+                img.style.maxWidth = "100%";
+                img.style.maxHeight = "100%";
+                img.style.border = "3px solid #ff6b00";
+                img.style.borderRadius = "8px";
+                img.style.boxShadow = "0 0 30px rgba(255, 107, 0, 0.4)";
+                
+                img.onload = function() {
+                    // 替换状态容器为卡片显示
+                    stateContainer.innerHTML = `
+                        <div class="card-display">
+                            ${img.outerHTML}
+                        </div>
+                        <div class="placeholder-graphic"></div>
+                    `;
+                    
+                    // 更新卡片信息
+                    updateCardInfo(card);
                 };
                 
-                // 更新卡片信息
+                // 设置图片加载超时（10秒）
+                setTimeout(() => {
+                    if (!img.complete) {
+                        throw new Error('卡片图片加载超时');
+                    }
+                }, 10000);
+                
+            } catch (error) {
+                stateContainer.innerHTML = `
+                    <div class="error">
+                        <div class="error-icon">⚠️</div>
+                        <div class="error-text">错误: ${error.message}，请稍后重试</div>
+                    </div>
+                `;
+            }
+        }
+        
+        async function updateCardInfo(card) {
+            try {
+                // 更新基本信息
                 document.getElementById('card-name').textContent = card.name;
                 document.getElementById('card-type').textContent = card.type;
                 document.getElementById('card-desc').textContent = card.desc;
@@ -469,8 +566,10 @@
                 
                 // 获取中文名称
                 try {
+                    const proxyUrl = 'https://api.allorigins.win/raw?url=';
                     const cn_targetUrl = 'https://ygocdb.com/api/v0/?search=' + card.id;
                     const cn_response = await fetch(proxyUrl + encodeURIComponent(cn_targetUrl));
+                    
                     if (cn_response.ok) {
                         const cn_data = await cn_response.json();
                         if (cn_data.result && cn_data.result.length > 0) {
@@ -482,10 +581,7 @@
                     console.log('中文卡片信息获取失败');
                 }
             } catch (error) {
-                document.getElementById('error').textContent = `错误: ${error.message}，请稍后重试`;
-                document.getElementById('error').style.display = 'block';
-            } finally {
-                document.getElementById('loading').style.display = 'none';
+                console.error('卡片信息更新失败:', error);
             }
         }
         
@@ -493,9 +589,12 @@
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('generate-btn').addEventListener('click', getRandomCard);
             
-            // 初次加载时显示占位图
-            document.getElementById('card-image').src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='880' viewBox='0 0 600 880'%3E%3Crect width='600' height='880' fill='%231a1a2f'/%3E%3Crect x='30' y='30' width='540' height='540' rx='15' fill='%233a3a5f'/%3E%3Ctext x='300' y='650' text-anchor='middle' font-family='Arial' font-size='48' fill='%23ffd700'%3E游戏王卡片生成器%3C/text%3E%3Ctext x='300' y='720' text-anchor='middle' font-family='Arial' font-size='28' fill='%23cccccc'%3E点击按钮开始生成卡片%3C/text%3E%3C/svg%3E";
-            document.getElementById('card-image').style.display = 'block';
+            // 设置初始占位符
+            const placeholder = `
+                data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='880' viewBox='0 0 600 880'%3E%3Crect width='600' height='880' fill='%231a1a2f'/%3E%3Crect x='30' y='30' width='540' height='540' rx='15' fill='%233a3a5f'/%3E%3Ctext x='300' y='650' text-anchor='middle' font-family='Arial' font-size='48' fill='%23ffd700'%3E游戏王卡片生成器%3C/text%3E%3Ctext x='300' y='720' text-anchor='middle' font-family='Arial' font-size='28' fill='%23cccccc'%3E点击按钮开始生成卡片%3C/text%3E%3C/svg%3E
+            `;
+            
+            document.getElementById('card-image').src = placeholder;
         });
     </script>
 </body>
