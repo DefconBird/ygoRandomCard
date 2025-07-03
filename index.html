@@ -3,123 +3,382 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>游戏王随机卡片生成器</title>
+    <title>游戏王卡片生成器</title>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background: #0a0a1a;
-            color: #fff;
-            min-height: 100vh;
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #1a1a1a;
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* 左侧区域（卡图展示） */
+        .left-section {
+            flex: 1.5; /* 加宽左侧区域 */
+            padding: 30px;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="800" viewBox="0 0 1000 800"><defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%23191919" /><stop offset="100%" stop-color="%23232323" /></linearGradient></defs><rect width="100%" height="100%" fill="url(%23grad)"/></svg>');
+            background-size: cover;
+            background-position: center center;
             display: flex;
             flex-direction: column;
+            position: relative;
+        }
+        
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
+            margin-bottom: 20px;
         }
-
-        .container {
-            max-width: 800px;
-            width: 100%;
+        
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #ff6b00;
         }
-
-        h1 {
-            text-align: center;
-            color: #ffd700;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-            margin-bottom: 30px;
-        }
-
-        #card-container {
-            background: #1a1a2f;
-            border: 2px solid #3a3a5f;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-            display: none;
-        }
-
-        .card-image {
-            width: 100%;
-            max-width: 300px;
-            border: 3px solid #3a3a5f;
-            border-radius: 10px;
-            margin: 0 auto;
-            display: block;
-        }
-
-        .card-info {
-            margin-top: 20px;
-        }
-
-        .card-info p {
-            margin: 8px 0;
-            font-size: 1.1em;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            margin-right: 8px;
-            font-weight: bold;
-        }
-
-        .monster-stats {
-            color: #ff6666;
-        }
-
-        .spell-trap {
-            color: #66cc66;
-        }
-
-        button {
-            background: #3a3a5f;
+        
+        #generate-btn {
+            background: linear-gradient(to right, #ff6b00, #ff8a00);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
+            padding: 14px 32px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 16px;
             cursor: pointer;
-            font-size: 1.1em;
             transition: all 0.3s;
-            margin: 10px auto;
-            display: block;
+            box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3);
         }
-
-        button:hover {
-            background: #4a4a7f;
-            transform: scale(1.05);
+        
+        #generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 107, 0, 0.4);
         }
-
+        
+        .card-container {
+            background-color: rgba(34, 34, 34, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 50px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        .slogan {
+            position: absolute;
+            bottom: 40px;
+            left: 0;
+            width: 100%;
+            padding: 0 30px;
+            text-align: center;
+        }
+        
+        .hero-title {
+            font-size: 36px;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 15px;
+        }
+        
+        .hero-subtitle {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #ccc;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        #card-image {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            border-radius: 8px;
+            border: 2px solid #ff6b00;
+            box-shadow: 0 0 20px rgba(255, 107, 0, 0.3);
+            transition: all 0.3s ease;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            object-fit: contain;
+        }
+        
+        /* 右侧区域（卡片信息） */
+        .right-section {
+            flex: 1; /* 减小右侧宽度 */
+            background-color: #222222;
+            padding: 40px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        
+        .page-title {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 50px;
+            height: 4px;
+            background: linear-gradient(to right, #ff6b00, #ff8a00);
+            border-radius: 2px;
+        }
+        
+        .info-container {
+            background-color: #292929;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s;
+            flex-grow: 1;
+        }
+        
+        .info-container:hover {
+            transform: translateY(-5px);
+        }
+        
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: #ff8a00;
+        }
+        
+        .detail-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .info-row {
+            display: flex;
+            flex-direction: column;
+            padding: 15px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .label {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        
+        .value {
+            font-size: 18px;
+            color: #fff;
+            font-weight: 500;
+        }
+        
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .monster-stats {
+            color: #ff6b00;
+            font-weight: 700;
+            font-size: 20px;
+        }
+        
+        .spell-trap {
+            color: #66cc66;
+            font-weight: 700;
+            font-size: 20px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 30px;
+            margin-right: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .loading {
+            text-align: center;
+            display: none;
+            color: #888;
+            font-size: 20px;
+            margin-top: 40px;
+        }
+        
         .error {
             color: #ff4444;
             text-align: center;
             padding: 10px;
             display: none;
         }
-
-        .loading {
-            text-align: center;
-            display: none;
-            color: #888;
+        
+        #card-desc {
+            line-height: 1.8;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .hero-title {
+                font-size: 30px;
+            }
+            
+            .left-section {
+                padding: 30px;
+                min-height: 60vh;
+            }
+            
+            .card-container {
+                margin-top: 30px;
+                min-height: 400px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 24px;
+            }
+            
+            .slogan {
+                position: relative;
+                bottom: 0;
+                margin-top: 20px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎴 游戏王随机卡片生成器</h1>
-        <button onclick="getRandomCard()">获取随机卡片</button>
-        <div class="loading" id="loading">加载中...</div>
-        <div class="error" id="error"></div>
-        <div id="card-container">
-            <img class="card-image" id="card-image" src="" alt="卡片图片">
-            <div class="card-info">
-                <h2 id="card-name"></h2>
-                <h2 id="card-cnname"></h2>
-                <p id="card-type"></p>
-                <p id="card-desc"></p>
-                <div id="card-stats"></div>
-                <p id="card-archetype"></p>
-                <p id="card-set"></p>
+        <!-- 左侧区域（卡图展示） -->
+        <div class="left-section">
+            <div class="top-bar">
+                <div class="logo">游戏王卡片生成器</div>
+                <button id="generate-btn">获取随机卡片</button>
+            </div>
+            
+            <div class="card-container">
+                <img id="card-image" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='580' viewBox='0 0 400 580'><rect width='400' height='580' fill='%231a1a2f'/><rect x='20' y='20' width='360' height='360' rx='10' fill='%233a3a5f'/><text x='200' y='450' text-anchor='middle' font-family='Arial' font-size='24' fill='%23ffd700'>游戏王卡片生成器</text><text x='200' y='500' text-anchor='middle' font-family='Arial' font-size='18' fill='%23cccccc'>点击按钮开始生成卡片</text></svg>" alt="随机游戏王卡片">
+                <div class="loading" id="loading">加载卡片中...</div>
+                <div class="error" id="error"></div>
+            </div>
+            
+            <div class="slogan">
+                <h2 class="hero-title">探索无限卡片世界</h2>
+                <p class="hero-subtitle">每次点击都会揭示一张独特的游戏王卡片，深入了解卡牌效果与属性</p>
+            </div>
+        </div>
+        
+        <!-- 右侧区域（卡片信息） -->
+        <div class="right-section">
+            <div class="info-header">
+                <div>
+                    <h2 class="page-title">卡片详情</h2>
+                    <div class="days-info"></div>
+                </div>
+                <div class="search-icon">🔍</div>
+            </div>
+            
+            <div class="info-container">
+                <h3 class="section-title">卡片信息</h3>
+                <div id="card-container" style="display: none;">
+                    <div class="detail-container">
+                        <div class="info-row">
+                            <div class="label">卡片名称</div>
+                            <div class="value">
+                                <span id="card-name"></span>
+                                <span id="card-cnname" style="display: block; margin-top: 8px; color: #ff8a00;"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="info-row">
+                            <div class="label">卡片类型</div>
+                            <div class="value">
+                                <span id="card-type" class="badge"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="info-row" id="card-stats-row" style="display: none;">
+                            <div class="label">属性与数值</div>
+                            <div id="card-stats" class="value">
+                                <div class="stats-row">
+                                    <span class="monster-stats">ATK/<span id="atk-value">?</span></span>
+                                    <span class="monster-stats">DEF/<span id="def-value">?</span></span>
+                                </div>
+                                <div style="margin-top: 15px;">
+                                    <span class="badge" id="level-info"></span>
+                                    <span class="badge" id="attribute-info"></span>
+                                    <span class="badge" id="race-info"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-row" id="spell-trap-row" style="display: none;">
+                            <div class="label">卡片种类</div>
+                            <div class="value">
+                                <span id="card-race" class="spell-trap badge"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="info-row">
+                            <div class="label">卡片描述</div>
+                            <div id="card-desc" class="value"></div>
+                        </div>
+                        
+                        <div class="info-row" id="archetype-row" style="display: none;">
+                            <div class="label">所属系列</div>
+                            <div id="card-archetype" class="value"></div>
+                        </div>
+                        
+                        <div class="info-row" id="set-row" style="display: none;">
+                            <div class="label">卡包信息</div>
+                            <div id="card-set" class="value"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -130,6 +389,12 @@
             document.getElementById('loading').style.display = 'block';
             document.getElementById('error').style.display = 'none';
             document.getElementById('card-container').style.display = 'none';
+            
+            // 重置特定信息
+            document.getElementById('card-stats-row').style.display = 'none';
+            document.getElementById('spell-trap-row').style.display = 'none';
+            document.getElementById('archetype-row').style.display = 'none';
+            document.getElementById('set-row').style.display = 'none';
         
             try {
                 // 使用代理服务并添加时间戳避免缓存
@@ -139,53 +404,76 @@
                 if (!response.ok) throw new Error('网络响应异常');
                 const data = await response.json();
                 const card = data.data[0];
-
-                const cn_targetUrl = 'https://ygocdb.com/api/v0/?search=' + card.id;
-                const cn_response = await fetch(proxyUrl + encodeURIComponent(cn_targetUrl));
-                if (!response.ok) throw new Error('网络响应异常');
-                const cn_data = await cn_response.json();
-                const cn_card = cn_data.result[0];
+                
+                // 更新卡片图像（使用时间戳防止缓存）
+                const cardImage = document.getElementById('card-image');
+                cardImage.src = card.card_images[0].image_url_cropped + '?t=' + new Date().getTime();
                 
                 // 更新卡片信息
                 document.getElementById('card-name').textContent = card.name;
-                document.getElementById('card-cnname').textContent = cn_card.cn_name;
-                // 添加时间戳避免图片缓存
-                document.getElementById('card-image').src = card.card_images[0].image_url_cropped + '?t=' + new Date().getTime();
-                document.getElementById('card-desc').textContent = cn_card.text.desc;
-                document.getElementById('card-type').innerHTML = 
-                    `类型: <span class="badge">${card.type}</span>`;
-        
-                // 处理不同类型卡片信息
-                const statsDiv = document.getElementById('card-stats');
-                statsDiv.innerHTML = '';
+                document.getElementById('card-type').textContent = card.type;
+                document.getElementById('card-desc').textContent = card.desc;
                 
+                // 处理不同类型卡片信息
                 if (card.type.includes('Monster')) {
-                    statsDiv.innerHTML = `
-                        <p class="monster-stats">ATK/${card.atk} | DEF/${card.def}</p>
-                        <p>等级: ${card.level} | 属性: ${card.attribute} | 种族: ${card.race}</p>
-                    `;
+                    document.getElementById('card-stats-row').style.display = 'block';
+                    document.getElementById('atk-value').textContent = card.atk;
+                    document.getElementById('def-value').textContent = card.def;
+                    document.getElementById('level-info').textContent = `等级: ${card.level}`;
+                    document.getElementById('attribute-info').textContent = `属性: ${card.attribute}`;
+                    document.getElementById('race-info').textContent = `种族: ${card.race}`;
                 } else {
-                    statsDiv.innerHTML = `
-                        <p class="spell-trap">类型: ${card.race}</p>
-                    `;
+                    document.getElementById('spell-trap-row').style.display = 'block';
+                    document.getElementById('card-race').textContent = card.race;
                 }
-        
+                
                 // 显示其他信息
-                document.getElementById('card-archetype').textContent = 
-                    card.archetype ? `所属系列: ${card.archetype}` : '';
-                document.getElementById('card-set').textContent = 
-                    card.card_sets ? `卡包: ${card.card_sets[0].set_name}` : '';
-        
+                if (card.archetype) {
+                    document.getElementById('archetype-row').style.display = 'block';
+                    document.getElementById('card-archetype').textContent = card.archetype;
+                }
+                
+                if (card.card_sets) {
+                    document.getElementById('set-row').style.display = 'block';
+                    document.getElementById('card-set').textContent = card.card_sets[0].set_name;
+                }
+                
+                // 获取中文名称
+                try {
+                    const cn_targetUrl = 'https://ygocdb.com/api/v0/?search=' + card.id;
+                    const cn_response = await fetch(proxyUrl + encodeURIComponent(cn_targetUrl));
+                    if (cn_response.ok) {
+                        const cn_data = await cn_response.json();
+                        if (cn_data.result && cn_data.result.length > 0) {
+                            document.getElementById('card-cnname').textContent = cn_data.result[0].cn_name;
+                            document.getElementById('card-desc').textContent = cn_data.result[0].text.desc;
+                        }
+                    }
+                } catch (e) {
+                    console.log('中文卡片信息获取失败');
+                }
+                
                 // 显示卡片容器
                 document.getElementById('card-container').style.display = 'block';
             } catch (error) {
-                document.getElementById('error').textContent = 
-                    `错误: ${error.message}，请稍后重试`;
+                document.getElementById('error').textContent = `错误: ${error.message}，请稍后重试`;
                 document.getElementById('error').style.display = 'block';
             } finally {
                 document.getElementById('loading').style.display = 'none';
             }
         }
+        
+        // 页面加载时初始化按钮
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('generate-btn').addEventListener('click', getRandomCard);
+            
+            // 配置卡片图片以保持宽高比
+            const cardImage = document.getElementById('card-image');
+            cardImage.style.width = 'auto';
+            cardImage.style.height = 'auto';
+            cardImage.style.maxWidth = '100%';
+            cardImage.style.maxHeight = '100%';
+        });
     </script>
 </body>
 </html>
